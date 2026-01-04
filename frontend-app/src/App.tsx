@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
 import axios from 'axios';
-import './i18n';
+import { AlertTriangle, BarChart3, Check, Copy, Link, RefreshCw, Zap } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Zap, Link, Copy, Check, BarChart3, AlertTriangle, RefreshCw } from 'lucide-react';
+import './i18n';
 
 interface UrlStats {
   shortCode: string;
@@ -19,6 +19,9 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [isErrorPage, setIsErrorPage] = useState(false);
 
+  // Definindo a URL base do seu Backend no Render
+  const API_BASE_URL = 'https://hermes-backend-zy5e.onrender.com';
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('error') === 'notfound') setIsErrorPage(true);
@@ -27,21 +30,22 @@ export default function App() {
 
   const fetchStats = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/v1/analytics/top');
+      // Atualizado para a URL do Render
+      const res = await axios.get(`${API_BASE_URL}/api/v1/analytics/top`);
       setStats(res.data);
     } catch (e) { console.error(e); }
   };
 
   const handleShorten = async () => {
     if (!url) return;
-    // Validação simples: se a URL for menor que 20 caracteres, talvez não precise encurtar
-    if (url.length < 20 && !url.includes('localhost')) {
-        if (!confirm('This URL is already very short. Do you want to shorten it anyway?')) return;
+    if (url.length < 20 && !url.includes('hermes-backend')) {
+      if (!confirm('This URL is already very short. Do you want to shorten it anyway?')) return;
     }
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8080/api/v1/shorten', { url });
+      // Atualizado para a URL do Render
+      const response = await axios.post(`${API_BASE_URL}/api/v1/shorten`, { url });
       setShortCode(response.data);
       fetchStats();
     } catch (error) { console.error(error); }
@@ -49,8 +53,8 @@ export default function App() {
   };
 
   const copyToClipboard = () => {
-    // Agora copiamos sem o /api/v1/
-    navigator.clipboard.writeText(`http://localhost:8080/${shortCode}`);
+    // Atualizado para copiar o link final do Render
+    navigator.clipboard.writeText(`${API_BASE_URL}/${shortCode}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -96,8 +100,8 @@ export default function App() {
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-2 block">{t('placeholder')}</label>
                 <div className="relative">
                   <Link className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
-                  <input 
-                    type="url" 
+                  <input
+                    type="url"
                     className="w-full bg-slate-950 border border-slate-800 p-4 pl-12 rounded-xl focus:ring-1 focus:ring-amber-500 outline-none transition-all text-sm text-slate-200"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
@@ -110,7 +114,8 @@ export default function App() {
 
               {shortCode && (
                 <div className="mt-6 p-4 bg-slate-950 border border-amber-500/20 rounded-xl flex items-center justify-between animate-in zoom-in-95">
-                  <span className="text-amber-500 font-mono font-bold text-sm">localhost:8080/{shortCode}</span>
+                  {/* Exibindo a URL final encurtada do Render */}
+                  <span className="text-amber-500 font-mono font-bold text-sm">hermes-backend-zy5e.onrender.com/{shortCode}</span>
                   <button onClick={copyToClipboard} className="p-2 hover:bg-slate-900 rounded-lg transition-colors">
                     {copied ? <Check size={18} className="text-green-500" /> : <Copy size={18} className="text-slate-500" />}
                   </button>
